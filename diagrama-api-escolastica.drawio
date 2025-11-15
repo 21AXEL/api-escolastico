@@ -1,0 +1,38 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="api-escolastica" name="Arquitectura API Escolástica">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <!-- Cliente -->
+        <mxCell id="2" value="Cliente&#10;(Postman / Frontend)&#10;Envía peticiones HTTP (GET, POST, PUT, DELETE) a la API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="220" width="220" height="100" as="geometry"/>
+        </mxCell>
+        <!-- Servidor Node.js / Express -->
+        <mxCell id="3" value="Servidor Node.js&#10;(API REST con Express)&#10;server.js: inicia servidor y conecta a MongoDB&#10;app.js: middlewares y rutas /api/alumnos" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="320" y="200" width="260" height="140" as="geometry"/>
+        </mxCell>
+        <!-- MongoDB -->
+        <mxCell id="4" value="MongoDB&#10;Base de datos: escolastico_db&#10;Colección: alumnos&#10;Conexión vía Mongoose (MONGODB_URI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="650" y="210" width="260" height="120" as="geometry"/>
+        </mxCell>
+        <!-- Docker -->
+        <mxCell id="5" value="Docker&#10;Contenedor: mongo-escolastico&#10;Imagen: mongo:7&#10;Puerto: 27017" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="680" y="360" width="220" height="100" as="geometry"/>
+        </mxCell>
+        <!-- Flecha Cliente -> Servidor -->
+        <mxCell id="6" style="endArrow=classic;html=1;strokeColor=#000000;" edge="1" parent="1" source="2" target="3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <!-- Flecha Servidor -> MongoDB -->
+        <mxCell id="7" style="endArrow=classic;html=1;strokeColor=#000000;" edge="1" parent="1" source="3" target="4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <!-- Flecha Docker -> MongoDB -->
+        <mxCell id="8" style="endArrow=classic;html=1;strokeColor=#000000;" edge="1" parent="1" source="5" target="4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
