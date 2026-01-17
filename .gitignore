@@ -1,4 +1,17 @@
+﻿# --- Node.js ---
 node_modules/
-.env
+node-api/node_modules/
 npm-debug.log
+.env
+
+# --- Python ---
+__pycache__/
+python-api/__pycache__/
+*.pyc
+.pytest_cache/
+venv/
+python-api/venv/
+
+# --- Sistema ---
 .DS_Store
+Thumbs.db

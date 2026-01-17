@@ -1,0 +1,32 @@
+﻿version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:5.0
+    container_name: mongodb_escolastico
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  api-alumnos:
+    build: ./node-api
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - MONGODB_URI=mongodb://mongodb:27017/escolastico_db
+    depends_on:
+      - mongodb
+
+  api-cursos:
+    build: ./python-api
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/escolastico_db
+    depends_on:
+      - mongodb
+
+volumes:
+  mongo_data:
