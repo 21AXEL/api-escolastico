@@ -1,125 +1,79 @@
-﻿from flask import Flask, request, jsonify
+﻿from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from pymongo import MongoClient
+from bson import ObjectId
 import os
-from bson.objectid import ObjectId
-from flasgger import Swagger
 
-app = Flask(__name__)
-app.config['SWAGGER'] = {
-    'title': 'API Escolar - Módulo Cursos',
-    'uiversion': 3
-}
-swagger = Swagger(app)
+app = FastAPI(
+    title="API de Cursos (Microservicio Python)",
+    description="Gestiona el catálogo de cursos usando FastAPI y MongoDB",
+    version="1.0.0"
+)
 
-mongo_uri = os.environ.get('MONGO_URI', 'mongodb://localhost:27017/escolastico_db')
-client = MongoClient(mongo_uri)
-db = client.get_default_database()
+# --- Configuración de MongoDB ---
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongodb:27017/escolastico_db")
+client = MongoClient(MONGO_URI)
+db = client.get_database()
 cursos_collection = db.cursos
 
-@app.route('/')
-def home():
-    return jsonify({'message': 'Ir a /apidocs para ver la interfaz'})
+# --- Modelos de Datos (Pydantic) ---
+class Curso(BaseModel):
+    nombre: str
+    descripcion: str
+    creditos: int
 
-@app.route('/api/cursos', methods=['POST'])
-def crear_curso():
-    '''
-    Crear nuevo curso
-    ---
-    tags:
-      - Cursos
-    parameters:
-      - name: body
-        in: body
-        required: true
-        schema:
-          type: object
-          properties:
-            nombre:
-              type: string
-            descripcion:
-              type: string
-            creditos:
-              type: integer
-    responses:
-      201:
-        description: Curso creado
-    '''
-    datos = request.json
-    nuevo_curso = {
-        'nombre': datos.get('nombre'),
-        'descripcion': datos.get('descripcion'),
-        'creditos': datos.get('creditos', 0)
+# --- Helper para convertir ObjectId a String ---
+def curso_helper(curso) -> dict:
+    return {
+        "id": str(curso["_id"]),
+        "nombre": curso["nombre"],
+        "descripcion": curso["descripcion"],
+        "creditos": curso["creditos"]
     }
-    resultado = cursos_collection.insert_one(nuevo_curso)
-    return jsonify({'message': 'Curso creado', 'id': str(resultado.inserted_id)}), 201
 
-@app.route('/api/cursos', methods=['GET'])
+# --- Rutas (Endpoints) ---
+
+@app.get("/", tags=["General"])
+def read_root():
+    return {"message": "Microservicio de Cursos (FastAPI) funcionando "}
+
+@app.get("/api/cursos", tags=["Cursos"])
 def listar_cursos():
-    '''
-    Listar cursos
-    ---
-    tags:
-      - Cursos
-    responses:
-      200:
-        description: Lista de cursos
-    '''
     cursos = []
     for curso in cursos_collection.find():
-        curso['_id'] = str(curso['_id'])
-        cursos.append(curso)
-    return jsonify(cursos)
+        cursos.append(curso_helper(curso))
+    return {"data": cursos}
 
-@app.route('/api/cursos/<id>', methods=['PUT'])
-def actualizar_curso(id):
-    '''
-    Actualizar un curso
-    ---
-    tags:
-      - Cursos
-    parameters:
-      - name: id
-        in: path
-        type: string
-        required: true
-      - name: body
-        in: body
-        required: true
-        schema:
-          type: object
-          properties:
-            nombre:
-              type: string
-            descripcion:
-              type: string
-            creditos:
-              type: integer
-    responses:
-      200:
-        description: Curso actualizado
-    '''
-    datos = request.json
-    cursos_collection.update_one({'_id': ObjectId(id)}, {'': datos})
-    return jsonify({'message': 'Curso actualizado correctamente'})
+@app.post("/api/cursos", tags=["Cursos"], status_code=201)
+def crear_curso(curso: Curso):
+    nuevo_curso = curso.dict()
+    resultado = cursos_collection.insert_one(nuevo_curso)
+    creado = cursos_collection.find_one({"_id": resultado.inserted_id})
+    return {"message": "Curso creado", "data": curso_helper(creado)}
 
-@app.route('/api/cursos/<id>', methods=['DELETE'])
-def eliminar_curso(id):
-    '''
-    Eliminar un curso
-    ---
-    tags:
-      - Cursos
-    parameters:
-      - name: id
-        in: path
-        type: string
-        required: true
-    responses:
-      200:
-        description: Curso eliminado
-    '''
-    cursos_collection.delete_one({'_id': ObjectId(id)})
-    return jsonify({'message': 'Curso eliminado correctamente'})
+@app.put("/api/cursos/{id}", tags=["Cursos"])
+def actualizar_curso(id: str, curso: Curso):
+    try:
+        oid = ObjectId(id)
+        resultado = cursos_collection.update_one(
+            {"_id": oid}, 
+            {"$set": curso.dict()}
+        )
+        if resultado.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Curso no encontrado")
+        
+        actualizado = cursos_collection.find_one({"_id": oid})
+        return {"message": "Curso actualizado", "data": curso_helper(actualizado)}
+    except Exception:
+        raise HTTPException(status_code=400, detail="ID inválido")
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+@app.delete("/api/cursos/{id}", tags=["Cursos"])
+def eliminar_curso(id: str):
+    try:
+        oid = ObjectId(id)
+        resultado = cursos_collection.delete_one({"_id": oid})
+        if resultado.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Curso no encontrado")
+        return {"message": "Curso eliminado correctamente"}
+    except Exception:
+        raise HTTPException(status_code=400, detail="ID inválido")

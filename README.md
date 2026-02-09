@@ -9,12 +9,12 @@ Sistema distribuido basado en **Microservicios** para la gestión académica. Im
 * **Orquestación:** Docker & Docker Compose
 * **Base de Datos:** MongoDB (v5.0)
 * **Microservicio 1 (Alumnos):** Node.js + Express + Mongoose
-* **Microservicio 2 (Cursos):** Python + Flask + PyMongo
+* **Microservicio 2 (Cursos):** Python + FastAPI + PyMongo
 * **Documentación API:** Swagger UI (OpenAPI 3.0)
 
 ---
 
-## 📁 Nueva Estructura del Proyecto
+## 📁 Estructura del Proyecto
 
 ```text
 api-escolastico/
@@ -24,7 +24,7 @@ api-escolastico/
  │    ├── package.json
  │    └── Dockerfile
  └── python-api/              # Microservicio de Cursos (Python)
-      ├── app.py
+      ├── app.py              # Código migrado a FastAPI
       ├── requirements.txt
       └── Dockerfile
 
@@ -36,7 +36,7 @@ Abre una terminal en la carpeta raíz del proyecto y ejecuta:
 
 docker-compose up --build
 
-Espera unos instantes hasta ver el mensaje "MongoDB Conectado" en la terminal.
+Espera unos instantes hasta ver los logs de los servicios iniciados.
 
 2. Apagar el sistema
 Para detener los servicios presiona Ctrl + C o ejecuta:
@@ -65,12 +65,12 @@ PUT /api/alumnos/{id} - Actualizar datos de un alumno.
 
 DELETE /api/alumnos/{id} - Eliminar un alumno.
 
-🐍 Microservicio de Cursos (Python)
-Gestión del catálogo académico.
+🐍 Microservicio de Cursos (Python - FastAPI)
+Gestión del catálogo académico. Actualizado a FastAPI para mayor rendimiento.
 
 URL Base: http://localhost:5000
 
-Documentación Interactiva: 👉 http://localhost:5000/apidocs
+Documentación Interactiva: 👉 http://localhost:5000/docs
 
 Endpoints disponibles:
 
@@ -83,7 +83,7 @@ PUT /api/cursos/{id} - Editar información de un curso.
 DELETE /api/cursos/{id} - Eliminar un curso del sistema.
 
 🔍 Ejemplos de Uso Manual (Opcional)
-Si prefieres no usar Swagger, puedes probar la API directamente:
+Si prefieres no usar Swagger, puedes probar la API directamente con Postman o Thunder Client:
 
 Ejemplo: Crear un Curso (Python)
 
@@ -107,3 +107,5 @@ Content-Type: application/json
   "email": "axel@example.com",
   "grado": "5to Semestre"
 }
+
+Despliegue en la Nube (Demo): El proyecto fue desplegado exitosamente utilizando túneles seguros (Ngrok) para acceso remoto. Estado: [PEGAS AQUÍ LA FOTO QUE ACABAS DE TOMAR]
